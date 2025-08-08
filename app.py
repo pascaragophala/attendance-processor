@@ -4,7 +4,6 @@ import io
 import csv
 import re
 from datetime import datetime
-import pandas as pd  # New import for Excel handling
 
 app = Flask(__name__)
 
@@ -31,46 +30,6 @@ student_db = load_student_database()
 def index():
     return render_template('index.html')
 
-def process_attendance_data(df, week):
-    """Process attendance data from either CSV or Excel"""
-    absent_students = []
-    first_module = None
-    
-    for _, row in df.iterrows():
-        if str(row.get('Attendance', '')).lower() == 'absent':
-            student_name = str(row.get('Student Name', ''))
-            course_code = str(row.get('Course Code', ''))
-            section_name = str(row.get('Section Name', ''))
-            
-            # Store first module code for filename
-            if first_module is None and course_code:
-                first_module = course_code
-            
-            # Extract qualification (everything before "(202")
-            qualification = section_name.split('(202')[0].strip()
-            
-            # Determine year from course code
-            year_match = re.search(r'^\D*(\d)', course_code)
-            year = f"Year{year_match.group(1)}" if year_match else "N/A"
-            
-            # Get student number
-            student_number = student_db.get(student_name, "N/A")
-            
-            absent_students.append({
-                "Student Number": student_number,
-                "Student Name": student_name,
-                "Module(s)": course_code,
-                "Qualification": qualification,
-                "Year": year,
-                "Week": f"Week{week}",
-                "Day": "N/A",
-                "Assessment(s)": "N/A",
-                "Marks Obtained": "N/A",
-                "Reason for AR": "Class Attendance_007"
-            })
-    
-    return absent_students, first_module
-
 @app.route('/process', methods=['POST'])
 def process_attendance():
     try:
@@ -84,21 +43,45 @@ def process_attendance():
         if not week or not week.isdigit() or int(week) < 1 or int(week) > 16:
             return jsonify({"error": "Please select a valid week (1-16)"}), 400
         
-        # Check file extension
-        filename = file.filename.lower()
+        # Process CSV file
+        content = file.read().decode('utf-8')
+        reader = csv.DictReader(io.StringIO(content))
         
-        if filename.endswith('.csv'):
-            # Process CSV file
-            content = file.read().decode('utf-8')
-            df = pd.read_csv(io.StringIO(content))
-        elif filename.endswith(('.xlsx', '.xls')):
-            # Process Excel file
-            df = pd.read_excel(file)
-        else:
-            return jsonify({"error": "Unsupported file type. Please upload CSV or Excel file."}), 400
+        absent_students = []
+        first_module = None  # To store the first module code for filename
         
-        # Process the data
-        absent_students, first_module = process_attendance_data(df, week)
+        for row in reader:
+            if row.get('Attendance', '').lower() == 'absent':
+                student_name = row.get('Student Name', '')
+                course_code = row.get('Course Code', '')
+                section_name = row.get('Section Name', '')
+                
+                # Store first module code for filename
+                if first_module is None and course_code:
+                    first_module = course_code
+                
+                # Extract qualification (everything before "(202")
+                qualification = section_name.split('(202')[0].strip()
+                
+                # Determine year from course code
+                year_match = re.search(r'^\D*(\d)', course_code)
+                year = f"Year{year_match.group(1)}" if year_match else "N/A"
+                
+                # Get student number
+                student_number = student_db.get(student_name, "N/A")
+                
+                absent_students.append({
+                    "Student Number": student_number,
+                    "Student Name": student_name,
+                    "Module(s)": course_code,
+                    "Qualification": qualification,
+                    "Year": year,
+                    "Week": f"Week{week}",  # Updated to include "Week" prefix
+                    "Day": "N/A",
+                    "Assessment(s)": "N/A",
+                    "Marks Obtained": "N/A",
+                    "Reason for AR": "Class Attendance_007"
+                })
         
         # Generate output CSV
         output = io.StringIO()
@@ -114,7 +97,7 @@ def process_attendance():
         mem_file = io.BytesIO(output.getvalue().encode('utf-8'))
         mem_file.seek(0)
         
-        # Generate filename
+        # Generate filename with first module code, week, and current date
         current_date = datetime.now().strftime('%Y%m%d')
         filename = f"{first_module}_AR_Report_Week_{week}_{current_date}.csv" if first_module else f"AR_Report_Week_{week}_{current_date}.csv"
         
