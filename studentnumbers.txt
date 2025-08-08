@@ -74,6 +74,33 @@ Thato Basit Maimela	25434391
 Zina Maja	25302290
 Phahleli Majoro	25302412
 Callum Makaleni	25302234
+David Mokgohloa 24425264
+Tshepang Mabusela 24301505
+Bohlale Leroy Maboko 24508717
+Wesani Baloyi	24509647
+Luca Henrique Brandao	24301510
+Zaahid De-Almeida	24301450
+Reneilwe La Fember	24301476
+Lerato Letsoalo	24301606
+David Con Lundie	24301635
+Gontse Madikwane	24301544
+Keletso Lalane Maimela	24301490
+Katlego Zwavhudi Makgato	24301504
+Matamela Makhado	24301465
+Jason Tshiamo Nhlanhla Masemola	24301621
+Unathi Lusanele Masemola	23301264
+Kelebogile Kate Mashigo	24225714
+Tshepo Monaheng	24301584
+Tebogo Mosoma	24301501
+Tshilidzi Muhanelwa	24301644
+Benjamin Mulamba	24301467
+Vhukhudo Mureri	24301586
+Mitchelle Tanatswa Mwerahare	23505723
+Kreshnie Roche Naidoo	24301541
+Thato Nong	24301440
+Nelisiwe Happy Nwanyana	24301627
+Sibusiso Nwedamutswu	24301526
+Makungu Sihlangu	24301481
 Karabo Makgaba	25302061
 Luki Moloko Makgamatha	25302281
 Tokollo Osley Makhafula	25302556
@@ -193,7 +220,6 @@ Lethabo Whitley	25302319
 Jamie Owen Williams	25301749
 Mhlabawethu Zuma	25301919
 Kutlwano Zwane	25302201
-
 Sakhile Kopano Basi	24301530  
 Durell Jardim	24301360  
 Megan Johnston	24301466  
@@ -220,7 +246,6 @@ Kaylynne Squire	24301332
 Bokang Tebjani	24301469  
 Emily-Ann van der Walt	24301336  
 Nathan Van huyssteen	24301348  
-
 Lesego Kgositlou	23301251
 Khaya Kunene	khayak
 Mncedisi Kunene	23301235
