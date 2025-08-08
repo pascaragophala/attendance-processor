@@ -48,11 +48,17 @@ def process_attendance():
         reader = csv.DictReader(io.StringIO(content))
         
         absent_students = []
+        first_module = None  # To store the first module code for filename
+        
         for row in reader:
             if row.get('Attendance', '').lower() == 'absent':
                 student_name = row.get('Student Name', '')
                 course_code = row.get('Course Code', '')
                 section_name = row.get('Section Name', '')
+                
+                # Store first module code for filename
+                if first_module is None and course_code:
+                    first_module = course_code
                 
                 # Extract qualification (everything before "(202")
                 qualification = section_name.split('(202')[0].strip()
@@ -70,7 +76,7 @@ def process_attendance():
                     "Module(s)": course_code,
                     "Qualification": qualification,
                     "Year": year,
-                    "Week": week,
+                    "Week": f"Week{week}",  # Updated to include "Week" prefix
                     "Day": "N/A",
                     "Assessment(s)": "N/A",
                     "Marks Obtained": "N/A",
@@ -91,7 +97,9 @@ def process_attendance():
         mem_file = io.BytesIO(output.getvalue().encode('utf-8'))
         mem_file.seek(0)
         
-        filename = f"AR_Report_Week_{week}_{datetime.now().strftime('%Y%m%d')}.csv"
+        # Generate filename with first module code, week, and current date
+        current_date = datetime.now().strftime('%Y%m%d')
+        filename = f"{first_module}_AR_Report_Week_{week}_{current_date}.csv" if first_module else f"AR_Report_Week_{week}_{current_date}.csv"
         
         return send_file(
             mem_file,
