@@ -327,6 +327,17 @@
                 submitBtn.innerHTML = '<i class="fas fa-file-export"></i> Generate AR Report';
             }
         });
+
+        // Updated date range calculation for Tuesday-Monday weeks
+        function current_week_date_range(week) {
+            const startDate = new Date(2025, 6, 29); // July 29, 2025 (month is 0-indexed)
+            startDate.setDate(startDate.getDate() + (week - 1) * 7);
+            const endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + 6); // Monday
+            
+            const options = { month: 'short', day: 'numeric' };
+            return `${startDate.toLocaleDateString('en-US', options)} - ${endDate.toLocaleDateString('en-US', options)}`;
+        }
     </script>
 </body>
 </html>
