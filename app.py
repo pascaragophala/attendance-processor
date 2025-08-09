@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, jsonify, send_file
 import io
 import csv
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
@@ -13,12 +13,28 @@ app = Flask(__name__)
 # Define the academic term start date (28 July 2025)
 TERM_START_DATE = datetime(2025, 7, 28)
 
+def get_week_date_range(week):
+    """Calculate the date range for a given week"""
+    start_date = TERM_START_DATE + timedelta(days=(week-1)*7)
+    end_date = start_date + timedelta(days=6)
+    return f"{start_date.strftime('%d %b')} - {end_date.strftime('%d %b')}"
+
 def get_current_week():
     """Calculate the current week based on the term start date"""
     today = datetime.now()
     delta = today - TERM_START_DATE
     current_week = (delta.days // 7) + 1
     return min(max(current_week, 1), 16)  # Clamp between 1 and 16
+
+# [Rest of your existing code remains the same until the index route]
+
+@app.route('/')
+def index():
+    current_week = get_current_week()
+    date_range = get_week_date_range(current_week)
+    return render_template('index.html', 
+                         current_week=current_week,
+                         date_range=date_range)
 
 # Load student database
 def load_student_database():
