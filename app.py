@@ -4,6 +4,9 @@ import io
 import csv
 import re
 from datetime import datetime
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from openpyxl.utils import get_column_letter
 
 app = Flask(__name__)
 
@@ -26,6 +29,57 @@ def load_student_database():
 
 student_db = load_student_database()
 
+def create_formatted_excel(data, headers):
+    """Create a formatted Excel workbook"""
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "AR Report"
+    
+    # Add headers
+    ws.append(headers)
+    
+    # Add data rows
+    for row in data:
+        ws.append([row.get(h, '') for h in headers])
+    
+    # Style the worksheet
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="0070C0", end_color="0070C0", fill_type="solid")
+    alignment = Alignment(horizontal="left", vertical="center")
+    thin_border = Border(left=Side(style='thin'), 
+                         right=Side(style='thin'), 
+                         top=Side(style='thin'), 
+                         bottom=Side(style='thin'))
+    
+    # Apply styles to headers
+    for col in range(1, len(headers) + 1):
+        cell = ws.cell(row=1, column=col)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = alignment
+        cell.border = thin_border
+    
+    # Apply styles to data rows
+    for row in ws.iter_rows(min_row=2, max_row=ws.max_row, min_col=1, max_col=len(headers)):
+        for cell in row:
+            cell.alignment = alignment
+            cell.border = thin_border
+    
+    # Auto-adjust column widths
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2) * 1.2
+        ws.column_dimensions[column].width = adjusted_width
+    
+    return wb
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -43,31 +97,40 @@ def process_attendance():
         if not week or not week.isdigit() or int(week) < 1 or int(week) > 16:
             return jsonify({"error": "Please select a valid week (1-16)"}), 400
         
-        # Process CSV file
-        content = file.read().decode('utf-8')
-        reader = csv.DictReader(io.StringIO(content))
+        # Read file based on extension
+        filename = file.filename.lower()
+        if filename.endswith('.csv'):
+            content = file.read().decode('utf-8')
+            reader = csv.DictReader(io.StringIO(content))
+            rows = list(reader)
+        elif filename.endswith(('.xlsx', '.xls')):
+            import pandas as pd
+            df = pd.read_excel(file)
+            rows = df.to_dict('records')
+        else:
+            return jsonify({"error": "Unsupported file type. Please upload CSV or Excel file."}), 400
         
+        # Process the data
         absent_students = []
-        first_module = None  # To store the first module code for filename
+        first_module = None
+        headers = [
+            "Student Number", "Student Name", "Module(s)", "Qualification", 
+            "Year", "Week", "Day", "Assessment(s)", 
+            "Marks Obtained", "Reason for AR"
+        ]
         
-        for row in reader:
-            if row.get('Attendance', '').lower() == 'absent':
-                student_name = row.get('Student Name', '')
-                course_code = row.get('Course Code', '')
-                section_name = row.get('Section Name', '')
+        for row in rows:
+            if str(row.get('Attendance', '')).lower() == 'absent':
+                student_name = str(row.get('Student Name', ''))
+                course_code = str(row.get('Course Code', ''))
+                section_name = str(row.get('Section Name', ''))
                 
-                # Store first module code for filename
                 if first_module is None and course_code:
                     first_module = course_code
                 
-                # Extract qualification (everything before "(202")
                 qualification = section_name.split('(202')[0].strip()
-                
-                # Determine year from course code
                 year_match = re.search(r'^\D*(\d)', course_code)
                 year = f"Year{year_match.group(1)}" if year_match else "N/A"
-                
-                # Get student number
                 student_number = student_db.get(student_name, "N/A")
                 
                 absent_students.append({
@@ -76,34 +139,28 @@ def process_attendance():
                     "Module(s)": course_code,
                     "Qualification": qualification,
                     "Year": year,
-                    "Week": f"Week{week}",  # Updated to include "Week" prefix
+                    "Week": f"Week{week}",
                     "Day": "N/A",
                     "Assessment(s)": "N/A",
                     "Marks Obtained": "N/A",
                     "Reason for AR": "Class Attendance_007"
                 })
         
-        # Generate output CSV
-        output = io.StringIO()
-        writer = csv.DictWriter(output, fieldnames=[
-            "Student Number", "Student Name", "Module(s)", "Qualification", 
-            "Year", "Week", "Day", "Assessment(s)", 
-            "Marks Obtained", "Reason for AR"
-        ])
-        writer.writeheader()
-        writer.writerows(absent_students)
+        # Create formatted Excel file
+        wb = create_formatted_excel(absent_students, headers)
         
-        # Create download response
-        mem_file = io.BytesIO(output.getvalue().encode('utf-8'))
-        mem_file.seek(0)
+        # Save to bytes stream
+        excel_buffer = io.BytesIO()
+        wb.save(excel_buffer)
+        excel_buffer.seek(0)
         
-        # Generate filename with first module code, week, and current date
+        # Generate filename
         current_date = datetime.now().strftime('%Y%m%d')
-        filename = f"{first_module}_AR_Report_Week_{week}_{current_date}.csv" if first_module else f"AR_Report_Week_{week}_{current_date}.csv"
+        filename = f"{first_module}_AR_Report_Week_{week}_{current_date}.xlsx" if first_module else f"AR_Report_Week_{week}_{current_date}.xlsx"
         
         return send_file(
-            mem_file,
-            mimetype='text/csv',
+            excel_buffer,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             as_attachment=True,
             download_name=filename
         )
