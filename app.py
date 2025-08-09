@@ -26,16 +26,6 @@ def get_current_week():
     current_week = (delta.days // 7) + 1
     return min(max(current_week, 1), 16)  # Clamp between 1 and 16
 
-# [Rest of your existing code remains the same until the index route]
-
-@app.route('/')
-def index():
-    current_week = get_current_week()
-    date_range = get_week_date_range(current_week)
-    return render_template('index.html', 
-                         current_week=current_week,
-                         date_range=date_range)
-
 # Load student database
 def load_student_database():
     students = {}
@@ -109,7 +99,10 @@ def create_formatted_excel(data, headers):
 @app.route('/')
 def index():
     current_week = get_current_week()
-    return render_template('index.html', current_week=current_week)
+    date_range = get_week_date_range(current_week)
+    return render_template('index.html', 
+                         current_week=current_week,
+                         date_range=date_range)
 
 @app.route('/process', methods=['POST'])
 def process_attendance():
