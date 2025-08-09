@@ -6,246 +6,20 @@
     <title>Attendance Processor | STADIO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-light: #3b82f6;
-            --primary-dark: #1d4ed8;
-            --secondary: #f8fafc;
-            --text: #1e293b;
-            --light-gray: #f1f5f9;
-            --border: #e2e8f0;
-            --white: #ffffff;
-            --error: #dc2626;
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--light-gray);
-            color: var(--text);
-            line-height: 1.5;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .card {
-            width: 100%;
-            max-width: 500px;
-            background: var(--white);
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-            padding: 40px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .card:hover {
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
-        }
-        
-        h1 {
-            color: var(--primary);
-            text-align: center;
-            margin-bottom: 32px;
-            font-weight: 600;
-            font-size: 28px;
-            position: relative;
-        }
-        
-        h1::after {
-            content: '';
-            position: absolute;
-            bottom: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--primary-light));
-            border-radius: 2px;
-        }
-        
-        .form-group {
-            margin-bottom: 24px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 500;
-            color: var(--text);
-            font-size: 16px;
-        }
-        
-        .file-upload {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .file-upload-input {
-            width: 100%;
-            padding: 16px;
-            border: 2px dashed var(--border);
-            border-radius: 12px;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            background-color: var(--secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            min-height: 60px;
-        }
-        
-        .file-upload-input:hover {
-            border-color: var(--primary);
-            background-color: rgba(37, 99, 235, 0.05);
-        }
-        
-        .file-upload-input.has-file {
-            border-style: solid;
-            background-color: var(--white);
-            justify-content: flex-start;
-        }
-        
-        .file-upload-icon {
-            margin-right: 12px;
-            color: var(--primary);
-            font-size: 20px;
-        }
-        
-        .file-upload-text {
-            color: #64748b;
-        }
-        
-        .file-upload-input.has-file .file-upload-text {
-            color: var(--text);
-        }
-        
-        input[type="file"] {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
-        
-        .week-info {
-            background-color: var(--light-gray);
-            padding: 16px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 24px;
-            font-weight: 500;
-        }
-        
-        button {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: var(--white);
-            border: none;
-            padding: 16px 24px;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            width: 100%;
-            transition: all 0.3s ease;
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        button:hover {
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        .error {
-            color: var(--error);
-            margin-top: 20px;
-            padding: 14px;
-            background-color: #fef2f2;
-            border-radius: 12px;
-            text-align: center;
-            font-weight: 500;
-            border: 1px solid #fecaca;
-            display: none;
-        }
-        
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-            font-size: 14px;
-        }
-        
-        .footer-left {
-            color: #64748b;
-        }
-        
-        .footer-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .footer-logo {
-            height: 24px;
-            width: auto;
-        }
-        
-        .footer-text {
-            font-weight: 500;
-            color: var(--primary);
-        }
-        
-        @media (max-width: 600px) {
-            .card {
-                padding: 30px 20px;
-            }
-            
-            h1 {
-                font-size: 24px;
-                margin-bottom: 28px;
-            }
-            
-            .footer {
-                flex-direction: column;
-                gap: 12px;
-                text-align: center;
-            }
-        }
+        /* [Keep all your existing CSS styles] */
     </style>
 </head>
 <body>
     <div class="card">
         <h1>Attendance Processor</h1>
         
-		<div class="week-info">
-			Current Week: Week {{ current_week }} ({{ date_range }})
-		</div>
+        <div class="week-info">
+            Current Week: Week {{ current_week }} ({{ date_range }})
+        </div>
         
         <form id="uploadForm" enctype="multipart/form-data">
             <div class="form-group">
-                <label for="attendance_file">Upload Attendance CSV:</label>
+                <label for="attendance_file">Upload Attendance File:</label>
                 <div class="file-upload">
                     <div class="file-upload-input" id="fileDisplay">
                         <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
@@ -275,21 +49,6 @@
     </div>
     
     <script>
-        // Helper function to calculate date range for a week
-        function current_week_date_range(week) {
-            const startDate = new Date(2025, 6, 28); // July 28, 2025 (month is 0-indexed)
-            startDate.setDate(startDate.getDate() + (week - 1) * 7);
-            const endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 6);
-            
-            const options = { month: 'short', day: 'numeric' };
-            return `${startDate.toLocaleDateString('en-US', options)} - ${endDate.toLocaleDateString('en-US', options)}`;
-        }
-        
-        // Update the week info with date range
-        document.querySelector('.week-info').textContent = 
-            `Current Week: Week {{ current_week }} (${current_week_date_range({{ current_week }})`;
-        
         // File input display
         const fileInput = document.getElementById('attendance_file');
         const fileDisplay = document.getElementById('fileDisplay');
