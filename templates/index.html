@@ -6,7 +6,202 @@
     <title>Attendance Processor | STADIO</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* [Keep all your existing CSS styles] */
+        :root {
+            --primary: #0055a5;  /* Darker blue to match STADIO branding */
+            --primary-light: #0077cc;
+            --white: #ffffff;
+            --light-gray: #f5f5f5;
+            --text: #333333;
+            --border: #dddddd;
+            --error: #dc2626;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-gray);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .card {
+            width: 100%;
+            max-width: 600px;
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 24px;
+        }
+        
+        .week-info {
+            background-color: var(--light-gray);
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 16px;
+            border: 1px solid var(--border);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text);
+            font-size: 14px;
+        }
+        
+        .file-upload {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .file-upload-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: var(--white);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 50px;
+            transition: all 0.3s ease;
+        }
+        
+        .file-upload-input:hover {
+            border-color: var(--primary);
+        }
+        
+        .file-upload-input.has-file {
+            border-style: solid;
+            justify-content: flex-start;
+        }
+        
+        .file-upload-icon {
+            margin-right: 10px;
+            color: var(--primary);
+            font-size: 18px;
+        }
+        
+        .file-upload-text {
+            color: #666;
+        }
+        
+        input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        button:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .error {
+            color: var(--error);
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #fef2f2;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 500;
+            border: 1px solid #fecaca;
+            display: none;
+            font-size: 14px;
+        }
+        
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+        }
+        
+        .footer-left {
+            color: #666;
+        }
+        
+        .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .footer-logo {
+            height: 20px;
+            width: auto;
+        }
+        
+        .footer-text {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 12px;
+        }
+        
+        @media (max-width: 600px) {
+            .card {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .footer {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
