@@ -10,6 +10,16 @@ from openpyxl.utils import get_column_letter
 
 app = Flask(__name__)
 
+# Define the academic term start date (28 July 2025)
+TERM_START_DATE = datetime(2025, 7, 28)
+
+def get_current_week():
+    """Calculate the current week based on the term start date"""
+    today = datetime.now()
+    delta = today - TERM_START_DATE
+    current_week = (delta.days // 7) + 1
+    return min(max(current_week, 1), 16)  # Clamp between 1 and 16
+
 # Load student database
 def load_student_database():
     students = {}
@@ -82,7 +92,8 @@ def create_formatted_excel(data, headers):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    current_week = get_current_week()
+    return render_template('index.html', current_week=current_week)
 
 @app.route('/process', methods=['POST'])
 def process_attendance():
@@ -92,10 +103,8 @@ def process_attendance():
         if not file:
             return jsonify({"error": "No file uploaded"}), 400
         
-        # Get selected week
-        week = request.form.get('week')
-        if not week or not week.isdigit() or int(week) < 1 or int(week) > 16:
-            return jsonify({"error": "Please select a valid week (1-16)"}), 400
+        # Calculate current week
+        week = get_current_week()
         
         # Read file based on extension
         filename = file.filename.lower()
