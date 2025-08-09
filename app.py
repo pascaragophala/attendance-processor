@@ -8,27 +8,26 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from openpyxl.utils import get_column_letter
 
-# Initialize Flask app
 app = Flask(__name__)
 
-# Configuration
-TERM_START_DATE = datetime(2025, 7, 28)  # Academic term starts 28 July 2025
+# Define the academic term start date (28 July 2025)
+TERM_START_DATE = datetime(2025, 7, 28)
 
 def get_week_date_range(week):
-    """Calculate the date range for a given week (Sunday to Saturday)"""
+    """Calculate the date range for a given week"""
     start_date = TERM_START_DATE + timedelta(days=(week-1)*7)
     end_date = start_date + timedelta(days=6)
     return f"{start_date.strftime('%d %b')} - {end_date.strftime('%d %b')}"
 
 def get_current_week():
-    """Calculate the current week based on term start date"""
+    """Calculate the current week based on the term start date"""
     today = datetime.now()
     delta = today - TERM_START_DATE
     current_week = (delta.days // 7) + 1
-    return min(max(current_week, 1), 16)  # Ensure week stays between 1-16
+    return min(max(current_week, 1), 16)  # Clamp between 1 and 16
 
+# Load student database
 def load_student_database():
-    """Load student numbers from text file"""
     students = {}
     try:
         with open('studentnumbers.txt', 'r', encoding='utf-8') as f:
@@ -36,21 +35,18 @@ def load_student_database():
                 line = line.strip()
                 if not line:
                     continue
-                # Handle both tab and space separated values
                 parts = line.rsplit('\t', 1) if '\t' in line else line.rsplit(' ', 1)
                 if len(parts) == 2:
                     name, number = parts[0].strip(), parts[1].strip()
                     students[name] = number
         return students
-    except Exception as e:
-        print(f"Error loading student database: {e}")
+    except Exception:
         return {}
 
-# Load student database at startup
 student_db = load_student_database()
 
 def create_formatted_excel(data, headers):
-    """Create professionally formatted Excel workbook"""
+    """Create a formatted Excel workbook"""
     wb = Workbook()
     ws = wb.active
     ws.title = "AR Report"
@@ -66,12 +62,10 @@ def create_formatted_excel(data, headers):
     header_font = Font(bold=True, color="FFFFFF")
     header_fill = PatternFill(start_color="0070C0", end_color="0070C0", fill_type="solid")
     alignment = Alignment(horizontal="left", vertical="center")
-    thin_border = Border(
-        left=Side(style='thin'), 
-        right=Side(style='thin'), 
-        top=Side(style='thin'), 
-        bottom=Side(style='thin')
-    )
+    thin_border = Border(left=Side(style='thin'), 
+                         right=Side(style='thin'), 
+                         top=Side(style='thin'), 
+                         bottom=Side(style='thin'))
     
     # Apply styles to headers
     for col in range(1, len(headers) + 1):
@@ -104,28 +98,24 @@ def create_formatted_excel(data, headers):
 
 @app.route('/')
 def index():
-    """Main page showing current week information"""
     current_week = get_current_week()
     date_range = get_week_date_range(current_week)
-    return render_template(
-        'index.html',
-        current_week=current_week,
-        date_range=date_range
-    )
+    return render_template('index.html', 
+                         current_week=current_week,
+                         date_range=date_range)
 
 @app.route('/process', methods=['POST'])
 def process_attendance():
-    """Process uploaded attendance file and generate report"""
     try:
-        # Validate file upload
+        # Get uploaded file
         file = request.files.get('attendance_file')
-        if not file or file.filename == '':
-            return jsonify({"error": "No file selected"}), 400
+        if not file:
+            return jsonify({"error": "No file uploaded"}), 400
         
-        # Get current week automatically
+        # Calculate current week
         week = get_current_week()
         
-        # Process different file types
+        # Read file based on extension
         filename = file.filename.lower()
         if filename.endswith('.csv'):
             content = file.read().decode('utf-8')
@@ -136,14 +126,14 @@ def process_attendance():
             df = pd.read_excel(file)
             rows = df.to_dict('records')
         else:
-            return jsonify({"error": "Unsupported file type. Please upload CSV or Excel."}), 400
+            return jsonify({"error": "Unsupported file type. Please upload CSV or Excel file."}), 400
         
-        # Process attendance data
+        # Process the data
         absent_students = []
         first_module = None
         headers = [
-            "Student Number", "Student Name", "Module(s)", "Qualification",
-            "Year", "Week", "Day", "Assessment(s)",
+            "Student Number", "Student Name", "Module(s)", "Qualification", 
+            "Year", "Week", "Day", "Assessment(s)", 
             "Marks Obtained", "Reason for AR"
         ]
         
@@ -174,19 +164,17 @@ def process_attendance():
                     "Reason for AR": "Class Attendance_007"
                 })
         
-        # Generate Excel report
+        # Create formatted Excel file
         wb = create_formatted_excel(absent_students, headers)
+        
+        # Save to bytes stream
         excel_buffer = io.BytesIO()
         wb.save(excel_buffer)
         excel_buffer.seek(0)
         
-        # Create download filename
+        # Generate filename
         current_date = datetime.now().strftime('%Y%m%d')
-        filename = (
-            f"{first_module}_AR_Report_Week_{week}_{current_date}.xlsx" 
-            if first_module 
-            else f"AR_Report_Week_{week}_{current_date}.xlsx"
-        )
+        filename = f"{first_module}_AR_Report_Week_{week}_{current_date}.xlsx" if first_module else f"AR_Report_Week_{week}_{current_date}.xlsx"
         
         return send_file(
             excel_buffer,
@@ -198,7 +186,6 @@ def process_attendance():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Entry point
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
