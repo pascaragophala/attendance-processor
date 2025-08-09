@@ -101,6 +101,7 @@ Thato Nong	24301440
 Nelisiwe Happy Nwanyana	24301627
 Sibusiso Nwedamutswu	24301526
 Makungu Sihlangu	24301481
+Ntsikayethu Sambeso Nyamezele 23301316
 Karabo Makgaba	25302061
 Luki Moloko Makgamatha	25302281
 Tokollo Osley Makhafula	25302556
@@ -220,6 +221,7 @@ Lethabo Whitley	25302319
 Jamie Owen Williams	25301749
 Mhlabawethu Zuma	25301919
 Kutlwano Zwane	25302201
+
 Sakhile Kopano Basi	24301530  
 Durell Jardim	24301360  
 Megan Johnston	24301466  
@@ -246,6 +248,7 @@ Kaylynne Squire	24301332
 Bokang Tebjani	24301469  
 Emily-Ann van der Walt	24301336  
 Nathan Van huyssteen	24301348  
+
 Lesego Kgositlou	23301251
 Khaya Kunene	khayak
 Mncedisi Kunene	23301235
