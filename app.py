@@ -11,13 +11,13 @@ from openpyxl.utils import get_column_letter
 # Initialize Flask app
 app = Flask(__name__)
 
-# Configuration
-TERM_START_DATE = datetime(2025, 7, 28)  # Academic term starts 28 July 2025
+# Updated Configuration - Term now starts Tuesday, July 29 2025
+TERM_START_DATE = datetime(2025, 7, 29)
 
 def get_week_date_range(week):
-    """Calculate the date range for a given week (Sunday to Saturday)"""
+    """Calculate the date range for a given week (Tuesday to Monday)"""
     start_date = TERM_START_DATE + timedelta(days=(week-1)*7)
-    end_date = start_date + timedelta(days=6)
+    end_date = start_date + timedelta(days=6)  # Tuesday + 6 days = Monday
     return f"{start_date.strftime('%d %b')} - {end_date.strftime('%d %b')}"
 
 def get_current_week():
@@ -36,7 +36,6 @@ def load_student_database():
                 line = line.strip()
                 if not line:
                     continue
-                # Handle both tab and space separated values
                 parts = line.rsplit('\t', 1) if '\t' in line else line.rsplit(' ', 1)
                 if len(parts) == 2:
                     name, number = parts[0].strip(), parts[1].strip()
@@ -198,7 +197,6 @@ def process_attendance():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Entry point
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
